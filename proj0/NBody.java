@@ -1,5 +1,5 @@
 public class NBody {
-    public static String imageToDraw = "images/starfield.jpg";
+    private static String imageToDraw = "images/starfield.jpg";
     /** Return the radius of the universe. */
     public static double readRadius(String fileName) {
         In in = new In(fileName);
