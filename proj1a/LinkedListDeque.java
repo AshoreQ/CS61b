@@ -11,9 +11,9 @@ public class LinkedListDeque<T> {
         }
 
         public Node() {
-            i = null;
-            p = null;
-            n = null;
+            item = null;
+            prev = null;
+            next = null;
         }
     }
 
