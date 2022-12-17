@@ -11,7 +11,9 @@ public class LinkedListDeque<T> {
         }
 
         public Node() {
-
+            i = null;
+            p = null;
+            n = null;
         }
     }
 
@@ -90,16 +92,19 @@ public class LinkedListDeque<T> {
         return p.item;
     }
 
+    private T getRecursiveHelper(Node p, int index) {
+        if (p == sentinel || index == 0) {
+            return p.item;
+        } else {
+            return getRecursiveHelper(p.next, --index);
+        }
+    }
+
     public T getRecursive(int index) {
-        Node p = sentinel;
-        p = p.next;
         if (size < index + 1) {
             return null;
         }
-        if (index == 0) {
-            return p.item;
-        } else {
-            return getRecursive(--index);
-        }
+        Node first = sentinel.next;
+        return getRecursiveHelper(first, index);    
     }
 }
