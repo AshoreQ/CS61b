@@ -19,9 +19,14 @@ public class TestPalindrome {
     @Test
     public void testIsPalindrome() {
         String a = "racecar", b = "cat";
-        OffByOne obo = new OffByOne();
-        boolean res1 = palindrome.isPalindrome(a, obo), res2 = palindrome.isPalindrome(b, obo);
+        boolean res1 = palindrome.isPalindrome(a), res2 = palindrome.isPalindrome(b);
         assertTrue(res1);
         assertFalse(res2);
+
+        CharacterComparator offByOne = new OffByOne();
+        assertTrue(palindrome.isPalindrome("a", offByOne));
+        assertTrue(palindrome.isPalindrome("", offByOne));
+        assertTrue(palindrome.isPalindrome("flake", offByOne));
+        assertFalse(palindrome.isPalindrome("cat", offByOne));
     }
 }

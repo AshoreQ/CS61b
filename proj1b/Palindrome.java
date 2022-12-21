@@ -9,17 +9,26 @@ public class Palindrome {
         return wordDeque;
     }
 
-    private boolean isPalinromeHelper(LinkedListDeque<Character> wordDeque,
-                                      CharacterComparator cc) {
-        if (wordDeque.size() == 1) {
+    private boolean isPalinromeHelper(LinkedListDeque<Character> wordDeque) {
+        if (wordDeque.isEmpty() || wordDeque.size() == 1) {
             return true;
         } else {
-            return cc.equalChars(wordDeque.removeFirst(), wordDeque.removeLast())
-                    && isPalinromeHelper(wordDeque, cc);
+            return (wordDeque.removeFirst() == wordDeque.removeLast())
+                    && isPalinromeHelper(wordDeque);
         }
     }
-    public boolean isPalindrome(String word, CharacterComparator cc) {
+    public boolean isPalindrome(String word) {
         LinkedListDeque<Character> wordDeque = (LinkedListDeque<Character>) wordToDeque(word);
-        return isPalinromeHelper(wordDeque, cc);
+        return isPalinromeHelper(wordDeque);
+    }
+
+    public boolean isPalindrome(String word, CharacterComparator cc) {
+        Deque<Character> deque = wordToDeque(word);
+        while (!deque.isEmpty() && deque.size() != 1) {
+            if (!cc.equalChars(deque.removeFirst(), deque.removeLast())) {
+                return false;
+            }
+        }
+        return true;
     }
 }
