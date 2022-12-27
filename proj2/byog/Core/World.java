@@ -272,7 +272,7 @@ public class World {
     }
 
     private  void addDoor(TETile[][] world, int totalRoom) {
-        int roomNumber = uniform(random, 0, totalRoom + 1);
+        int roomNumber = uniform(random, 0, totalRoom);
         Room choseRoom = existingRooms.get(roomNumber);
         int widthOfRoom = choseRoom.width + 2;
         int heightOfRoom = choseRoom.height + 2;
@@ -300,7 +300,7 @@ public class World {
             }
         }
 
-        int totalRoom = uniform(random, 20, Rnumber);
+        int totalRoom = uniform(random, 15, Rnumber);
         while (totalRoom > 0) {
             Room room =  getNewRandomRoom();
             existingRooms.add(room);
