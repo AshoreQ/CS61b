@@ -16,7 +16,7 @@ public class Game {
     public void playWithKeyboard() {
         TERenderer ter = new TERenderer();
         ter.initialize(WIDTH, HEIGHT);
-        World world = new World(343L, WIDTH, HEIGHT);
+        World world = new World(34, WIDTH, HEIGHT);
         TETile[][] map = world.generateWorld();
         ter.renderFrame(map);
     }
