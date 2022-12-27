@@ -271,25 +271,23 @@ public class World {
         addVerticalHallway(world, a, b);
     }
 
-    private  void addDoor(TETile[][] world, int totalRoom) {
-        int roomNumber = uniform(random, 0, totalRoom);
-        Room choseRoom = existingRooms.get(roomNumber);
-        int widthOfRoom = choseRoom.width + 2;
-        int heightOfRoom = choseRoom.height + 2;
-        int circumferenceOfRoom = 2 * widthOfRoom + 2 * (heightOfRoom - 2);
-        int choseTile = uniform(random, 0, circumferenceOfRoom);
-        if (choseTile < heightOfRoom - 1) {
-            world[choseRoom.position.x - 1][choseRoom.position.y + choseTile] =
-                    Tileset.LOCKED_DOOR;
-        } else if (choseTile < heightOfRoom + widthOfRoom - 1) {
-            world[choseRoom.position.x + choseTile - heightOfRoom - 2][getRoomRAPosition(choseRoom).y] =
-                    Tileset.LOCKED_DOOR;
-        } else if (choseTile < 2 * heightOfRoom + widthOfRoom - 2) {
-            world[getRoomRAPosition(choseRoom).x][getRoomRAPosition(choseRoom).y - (choseTile + 1 - heightOfRoom - widthOfRoom)] =
-                    Tileset.LOCKED_DOOR;
-        } else {
-            world[choseRoom.position.x + circumferenceOfRoom - choseTile - 1][choseRoom.position.y - 1] =
-                    Tileset.LOCKED_DOOR;
+    private  void addDoor(TETile[][] world) {
+        TETile t = TETile.colorVariant(Tileset.LOCKED_DOOR, 64, 64, 64, random);
+        int xi = uniform(random, 0, width);
+        int yi = uniform(random, 0, height);
+        while (xi < width && yi < height) {
+            if (world[xi][yi].character() == Tileset.WALL.character()) {
+                world[xi][yi] = t;
+                break;
+            }
+            yi++;
+            if (yi == height) {
+                xi++;
+                yi = 0;
+            }
+            if (xi == width) {
+                xi = 0;
+            }
         }
     }
 
@@ -322,7 +320,7 @@ public class World {
             addHallway(world, first, next);
         }
 
-        addDoor(world, size);
+        addDoor(world);
 
         Player player = new Player();
         return world;
