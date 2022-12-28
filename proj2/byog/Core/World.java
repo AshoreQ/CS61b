@@ -2,75 +2,33 @@ package byog.Core;
 
 import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
-import static byog.Core.RandomUtils.uniform;
-import java.util.Collections;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
 import java.util.Random;
 
-public class World {
+import static byog.Core.RandomUtils.uniform;
+
+public class World implements Serializable{
+    private static final long serialVersionUID = 123123123L;
+    TETile[][] map;
+    private Player player;
+    private TETile replacedTile;
+    private Random RANDOM;
     private int width;
     private int height;
-    private long seed;
-    private Random random;
-    private int Rwidth = 10;
-    private int Rheight = 8;
-    private int Rnumber = 25;
-    private List<Room> existingRooms = new ArrayList(Rnumber);
-    private TETile[][] world;
+    boolean gameOver = false;
 
-    World(long seed, int width, int height) {
-        this.seed = seed;
-        this.width = width;
-        this.height = height;
-        random = new Random(seed);
-        world = new TETile[width][height];
-        for (int i = 0; i < width; i += 1) {
-            for (int j = 0; j < height; j += 1) {
-                world[i][j] = Tileset.NOTHING;
-            }
-        }
-    }
-
-    private class Position {
-        private int x;
-        private int y;
-
-
-        Position(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
-
-    private class Room implements Comparable<Room> {
-        private int width;
-        private int height;
-        private Position position;
-
-        Room(Position position, int width, int height) {
-            this.position = position;
-            this.width = width;
-            this.height = height;
-        }
-
-        @Override
-        public int compareTo(World.Room o) {
-            return this.position.x - o.position.x;
-        }
-    }
-
-    private class Player {
+    private class Player implements Serializable {
+        private static final long serialVersionUID = 10923233434L;
         int x;
         int y;
         TETile t;
 
-        Player() {
-            t = TETile.colorVariant(Tileset.PLAYER, 64, 64, 64, random);
-            int xi = uniform(random, 0, width);
-            int yi = uniform(random, 0, height);
+        public Player() {
+            t = TETile.colorVariant(Tileset.PLAYER, 64, 64, 64, RANDOM);
+            int xi = uniform(RANDOM, 0, width);
+            int yi = uniform(RANDOM, 0, height);
             while (xi < width && yi < height) {
-                if (world[xi][yi].character() == Tileset.FLOOR.character()) {
+                if (map[xi][yi].character() == Tileset.FLOOR.character()) {
                     this.x = xi;
                     this.y = yi;
                     break;
@@ -84,245 +42,56 @@ public class World {
                     xi = 0;
                 }
             }
-            world[this.x][this.y] = t;
+            replacedTile = map[this.x][this.y];
+            map[this.x][this.y] = t;
         }
-    }
 
-
-    private Room getNewRandomRoom() {
-        int xPos = uniform(random, 0, width);
-        int yPos = uniform(random, 0, height);
-        int roomWidth = uniform(random, 3, Rwidth);
-        int roomHeight = uniform(random, 3, Rheight);
-        Position pos = new Position(xPos, yPos);
-        Room room = new Room(pos, roomWidth, roomHeight);
-        return room;
-    }
-
-
-    private Position getRoomLBPosition(Room r) {
-        int x = r.position.x - 1;
-        int y = r.position.y - 1;
-        return new Position(x, y);
-    }
-
-    private Position getRoomRAPosition(Room r) {
-        int x = r.position.x + r.width;
-        int y = r.position.y + r.height;
-        return new Position(x, y);
-    }
-
-
-    private boolean isRoomOverlap(Room r1, Room r2) {
-        return Math.max(getRoomLBPosition(r1).x, getRoomLBPosition(r2).x)
-                  <= Math.min(getRoomRAPosition(r1).x, getRoomRAPosition(r2).x)
-                && Math.max(getRoomLBPosition(r1).y, getRoomLBPosition(r2).y)
-                  <= Math.min(getRoomRAPosition(r1).y, getRoomRAPosition(r2).y);
-    }
-
-    private boolean isSomeRoomOverlap() {
-        int size = existingRooms.size();
-        if (size <= 1) {
-            return false;
-        }
-        Room last = existingRooms.get(size - 1);
-        boolean sign = false;
-        for (int i = 0; i < size - 1; i += 1) {
-            sign = sign | (isRoomOverlap(last, existingRooms.get(i)));
-            if (sign) {
-                return true;
+        private void move(int dx, int dy) {
+            if (x + dx >= width || y + dy >= height || x + dx < 0 || y + dy < 0) {
+                return;
             }
-        }
-        return false;
-    }
-
-    private boolean isRoomValid(Room room) {
-        return (room.position.x - 1 >= 0) && (room.position.y - 1 >= 0)
-                && (room.position.x + room.width < width)
-                && (room.position.y + room.height < height);
-    }
-
-    private void addRoomFloor(TETile[][] world, Position pos, int width, int height) {
-        for (int i = 0; i < height; i += 1) {
-            for (int j = 0; j < width; j += 1) {
-                world[pos.x + j][pos.y + i] =
-                        TETile.colorVariant(Tileset.FLOOR, 64, 64, 64, random);
+            if (map[x + dx][y + dy].character() == Tileset.FLOOR.character()) {
+                map[x][y] = replacedTile;
+                x = x + dx;
+                y = y + dy;
+                replacedTile = map[x][y];
+                map[x][y] = t;
+            } else if (map[x + dx][y + dy].character() == Tileset.LOCKED_DOOR.character()) {
+                map[x + dx][y + dy] =
+                        TETile.colorVariant(Tileset.UNLOCKED_DOOR, 64, 64, 64, RANDOM);
+            } else if (map[x + dx][y + dy].character() == Tileset.UNLOCKED_DOOR.character()) {
+                map[x][y] = replacedTile;
+                x = x + dx;
+                y = y + dy;
+                replacedTile = map[x][y];
+                map[x][y] = t;
+                gameOver = true;
             }
         }
     }
-
-    private void addLeftWall(TETile[][] world, Position pos, int height) {
-        for (int i = 0; i < height; i += 1) {
-            world[pos.x - 1][pos.y + i] =
-                    TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
-        }
+    public World(TETile[][] map, long seed) {
+        this.map = map;
+        this.height = map[0].length;
+        this.width = map.length;
+        RANDOM = new Random(seed);
+        player = new Player();
     }
 
-    private void addRightWall(TETile[][] world, Position pos, int height, int width) {
-        for (int i = 0; i < height; i += 1) {
-            world[pos.x + width][pos.y + i] =
-                    TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
-        }
-    }
-
-    private void addAboveWall(TETile[][] world, Position pos, int height, int width) {
-        for (int i = 0; i < width + 2; i += 1) {
-            world[pos.x - 1 + i][pos.y + height] =
-                    TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
-        }
-    }
-
-    private void addBelowWall(TETile[][] world, Position pos, int width) {
-        for (int i = 0; i < width + 2; i += 1) {
-            world[pos.x - 1 + i][pos.y - 1]
-                    = TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
-        }
-    }
-
-    private void addRoomWall(TETile[][] world, Position pos, int width, int height) {
-        addBelowWall(world, pos, width);
-        addAboveWall(world, pos, height, width);
-        addLeftWall(world, pos, height);
-        addRightWall(world, pos, height, width);
-    }
-
-    private Position getRandomPosition(Room room) {
-        int xOffset = uniform(random, 1, room.width - 1);
-        int yOffset = uniform(random, 1, room.height - 1);
-        return new Position(room.position.x + xOffset, room.position.y + yOffset);
-    }
-
-    private boolean isFloor(TETile[][] world, int x, int y) {
-        return !(world[x][y].character() == '#' || world[x][y].character() == ' ');
-    }
-
-    private void addHorizontalHallway(TETile[][] world, Position a, Position b) {
-        int distance = Math.abs(b.x - a.x) + 1;
-        if (a.x <= b.x) {
-            for (int i = 0; i < distance; i += 1) {
-                if (!isFloor(world, a.x + i, a.y)) {
-                    world[a.x + i][a.y] =
-                            TETile.colorVariant(Tileset.FLOOR, 64, 64, 64, random);
-                }
-                if (!isFloor(world, a.x + i, a.y - 1)) {
-                    world[a.x + i][a.y - 1] =
-                            TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
-                }
-                if (!isFloor(world, a.x + i, a.y + 1)) {
-                    world[a.x + i][a.y + 1] =
-                            TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
-                }
-            }
-        } else {
-            for (int i = 0; i < distance; i += 1) {
-                if (!isFloor(world, b.x + i, a.y)) {
-                    world[b.x + i][a.y] =
-                            TETile.colorVariant(Tileset.FLOOR, 64, 64, 64, random);
-                }
-                if (!isFloor(world, b.x + i, a.y - 1)) {
-                    world[b.x + i][a.y - 1] =
-                            TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
-                }
-                if (!isFloor(world, b.x + i, b.y + 1)) {
-                    world[b.x + i][a.y + 1] =
-                            TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
-                }
-            }
-        }
-    }
-
-    private void addVerticalHallway(TETile[][] world, Position a, Position b) {
-        int distance = Math.abs(a.y - b.y) + 1;
-        if (a.y <= b.y) {
-            for (int i = 0; i < distance; i += 1) {
-                if (!isFloor(world, b.x, a.y + i)) {
-                    world[b.x][a.y + i] =
-                            TETile.colorVariant(Tileset.FLOOR, 64, 64, 64, random);
-                }
-                if (!isFloor(world, b.x - 1, a.y + i)) {
-                    world[b.x - 1][a.y + i] =
-                            TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
-                }
-                if (!isFloor(world, b.x + 1, a.y + i)) {
-                    world[b.x + 1][a.y + i] =
-                            TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
-                }
-            }
-        } else {
-            for (int i = 0; i < distance; i += 1) {
-                if (!isFloor(world, b.x, b.y + i)) {
-                    world[b.x][b.y + i] =
-                            TETile.colorVariant(Tileset.FLOOR, 64, 64, 64, random);
-                }
-                if (!isFloor(world, b.x - 1, b.y + i)) {
-                    world[b.x - 1][b.y + i] =
-                            TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
-                }
-                if (!isFloor(world, b.x + 1, b.y + i)) {
-                    world[b.x + 1][b.y + i] =
-                            TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
-                }
-            }
-        }
-    }
-
-    private void addHallway(TETile[][] world, Position a, Position b) {
-        addHorizontalHallway(world, a, b);
-        addVerticalHallway(world, a, b);
-    }
-
-    private  void addDoor(TETile[][] world) {
-        TETile t = TETile.colorVariant(Tileset.LOCKED_DOOR, 64, 64, 64, random);
-        int xi = uniform(random, 0, width);
-        int yi = uniform(random, 0, height);
-        while (xi < width && yi < height) {
-            if (world[xi][yi].character() == Tileset.WALL.character()) {
-                world[xi][yi] = t;
+    public void controlPlayer(Character c) {
+        switch (c) {
+            case 'w':
+                player.move(0, 1);
                 break;
-            }
-            yi++;
-            if (yi == height) {
-                xi++;
-                yi = 0;
-            }
-            if (xi == width) {
-                xi = 0;
-            }
+            case 'a':
+                player.move(-1, 0);
+                break;
+            case 's':
+                player.move(0, -1);
+                break;
+            case 'd':
+                player.move(1, 0);
+                break;
+            default:
         }
-    }
-
-    public TETile[][] generateWorld() {
-        for (int x = 0; x < width; x += 1) {
-            for (int y = 0; y < height; y += 1) {
-                world[x][y] = Tileset.NOTHING;
-            }
-        }
-
-        int totalRoom = uniform(random, 15, Rnumber);
-        while (totalRoom > 0) {
-            Room room =  getNewRandomRoom();
-            existingRooms.add(room);
-            if (isRoomValid(room) && !isSomeRoomOverlap()) {
-                addRoomFloor(world, room.position, room.width, room.height);
-                addRoomWall(world, room.position, room.width, room.height);
-                totalRoom -= 1;
-            } else {
-                existingRooms.remove(room);
-            }
-        }
-
-        Collections.sort(existingRooms, Room::compareTo);
-
-        int size = existingRooms.size();
-        for (int i = 0; i < size - 1; i += 1) {
-            Position first = getRandomPosition(existingRooms.get(i));
-            Position next = getRandomPosition(existingRooms.get(i + 1));
-            addHallway(world, first, next);
-        }
-
-        addDoor(world);
-
-        Player player = new Player();
-        return world;
     }
 }
