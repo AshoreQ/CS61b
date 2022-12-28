@@ -2,23 +2,15 @@ package byog.Core;
 
 import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
+
 import java.io.Serializable;
 import java.util.Random;
 
 import static byog.Core.RandomUtils.uniform;
 
-public class World implements Serializable{
-    private static final long serialVersionUID = 123123123L;
-    TETile[][] map;
-    private Player player;
-    private TETile replacedTile;
-    private Random RANDOM;
-    private int width;
-    private int height;
-    boolean gameOver = false;
-
-    private class Player implements Serializable {
-        private static final long serialVersionUID = 10923233434L;
+public class World implements Serializable {
+    public class Player implements Serializable {
+        private static final long serialVersionUID = 20000000311L;
         int x;
         int y;
         TETile t;
@@ -42,6 +34,7 @@ public class World implements Serializable{
                     xi = 0;
                 }
             }
+
             replacedTile = map[this.x][this.y];
             map[this.x][this.y] = t;
         }
@@ -69,6 +62,16 @@ public class World implements Serializable{
             }
         }
     }
+
+    private static final long serialVersionUID = 1231231231L;
+    TETile[][] map;
+    private Player player;
+    private TETile replacedTile;
+    private Random RANDOM;
+    private int height;
+    private int width;
+    boolean gameOver = false;
+
     public World(TETile[][] map, long seed) {
         this.map = map;
         this.height = map[0].length;
@@ -94,4 +97,5 @@ public class World implements Serializable{
             default:
         }
     }
+
 }

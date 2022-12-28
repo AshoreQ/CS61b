@@ -1,6 +1,7 @@
 package byog.lab5;
 
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 import byog.TileEngine.TERenderer;
@@ -12,66 +13,9 @@ import java.util.Random;
 /**
  * Draws a world consisting of hexagonal regions.
  */
-
-/*
 public class HexWorld {
-    private static final int WIDTH = 50;
-    private static final int HEIGHT = 50;
-
-    private static final int SIZE = 3;
-
-    private static final long SEED = 2873123;
-    private static final Random RANDOM = new Random(SEED);
-    private static class Position {
-        int x;
-        int y;
-
-        Position(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
-
-
-    private static TETile randomTile() {
-        int tileNum = RANDOM.nextInt(3);
-        switch (tileNum) {
-            case 0: return Tileset.WALL;
-            case 1: return Tileset.FLOWER;
-            case 2: return Tileset.NOTHING;
-            default: return Tileset.NOTHING;
-        }
-    }
-    public static void addHexagon(TETile[][] world, Position p, int s, TETile t) {
-        for (int x = 0; x < s;  ++x) {
-            for (int y = 0; y < s + 2 * x; ++y) {
-                world[p.x + x][p.y - x + y] = t;
-                world[p.x + 2 * (s - x) - 1][p.y - x + y] = t;
-            }
-        }
-    }
-
-    public static void main(String[] args) {
-        TERenderer ter = new TERenderer();
-        ter.initialize(WIDTH, HEIGHT);
-
-        TETile[][] hexagonWorld = new TETile[WIDTH][HEIGHT];
-
-        for (int x = SIZE; x > 0; --x) {
-            for (int y = x + SIZE - 1 ; y > SIZE; --y) {
-                int xPos = (int) Math.round((WIDTH - SIZE) / 2.0), yPos = 0;
-                Position pos = new Position(xPos, yPos);
-                addHexagon(hexagonWorld, pos, SIZE, randomTile());
-            }
-        }
-        ter.renderFrame(hexagonWorld);
-    }
-}
-*/
-
-public class HexWorld {
-    private static final int WIDTH = 50;
-    private static final int HEIGHT = 50;
+    private static final int WIDTH = 25;
+    private static final int HEIGHT = 25;
 
     private static final long SEED = 3;
     private static final Random RANDOM = new Random(SEED);
@@ -183,8 +127,8 @@ public class HexWorld {
             }
         }
 
-        Position p = new Position(30, 30);
-        addHexagon(world, p, 4, Tileset.FLOWER);
+        Position p = new Position(10, 10);
+        addHexagon(world, p, 3, Tileset.FLOWER);
 
         ter.renderFrame(world);
     }
@@ -218,4 +162,3 @@ public class HexWorld {
     }
 
 }
-

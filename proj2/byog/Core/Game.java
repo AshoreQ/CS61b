@@ -3,8 +3,7 @@ package byog.Core;
 import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
 import edu.princeton.cs.introcs.StdDraw;
-import java.awt.Color;
-import java.awt.Font;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -12,98 +11,55 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.awt.Color;
+import java.awt.Font;
 
 public class Game {
     TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
     public static final int WIDTH = 60;
     public static final int HEIGHT = 30;
-
-    private static final int HUD_OFFSET = 3;
+    public static final int HUD_OFFSET = 2;
 
     /**
      * Method used for playing a fresh game. The game should start from the main menu.
      */
-    private void init() {
-        StdDraw.setCanvasSize(WIDTH * 16, HEIGHT * 16);
-        StdDraw.setXscale(0, WIDTH);
-        StdDraw.setYscale(0, HEIGHT);
-        StdDraw.clear(Color.BLACK);
-        StdDraw.enableDoubleBuffering();
-    }
-
-    private boolean isControlCommand(Character c) {
-        return c == 'w' || c == 'a' || c == 's' || c == 'd';
-    }
-
-    private static void drawMenu() {
-        int midWidth = WIDTH / 2;
-        int midHeight = HEIGHT / 2;
-        StdDraw.clear();
-        StdDraw.clear(Color.BLACK);
-        StdDraw.setPenColor(Color.WHITE);
-
-        Font bigFont = new Font("Monaco", Font.BOLD, 40);
-        StdDraw.setFont(bigFont);
-        StdDraw.text(midWidth, HEIGHT - 6, "CS61B: The Game");
-
-        Font smallFont = new Font("Monaco", Font.BOLD, 20);
-        StdDraw.setFont(smallFont);
-        StdDraw.text(midWidth, midHeight, "New Game (N)");
-        StdDraw.text(midWidth, midHeight - 2, "Load Game (L)");
-        StdDraw.text(midWidth, midHeight - 4, "Quit (Q)");
-        StdDraw.show();
-    }
-
-    private int beginNewGame() {
-        int midWidth = WIDTH / 2, midHeight = HEIGHT / 2;
-        int seed;
-        String input = "";
-
-        StdDraw.clear(Color.BLACK);
-        Font bigFont = new Font("Monaco", Font.BOLD, 30);
-        StdDraw.setFont(bigFont);
-        StdDraw.text(midWidth, midHeight, "Random seed:");
-
-        Font smallFont = new Font("Monaco", Font.BOLD, 20);
-        StdDraw.setFont(smallFont);
-        StdDraw.text(midWidth, midHeight - 3, "( Please enter S after the number )");
-        StdDraw.show();
-
+    public void playWithKeyboard() {
+        init();
+        drawMenu();
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
                 char c = StdDraw.nextKeyTyped();
-                if (c == 'S') {
-                    seed = Integer.parseInt(input);
-                    return seed;
-                } else {
-                    input += c;
-                    StdDraw.clear(Color.BLACK);
-                    StdDraw.setFont(bigFont);
-                    StdDraw.text(midWidth, midHeight, "Random seed:" + input);
-                    StdDraw.setFont(smallFont);
-                    StdDraw.text(midWidth, midHeight - 3, "( Please enter S after the number )");
-                    StdDraw.show();
+                c = Character.toLowerCase(c);
+                switch (c) {
+                    case 'n':
+                        long seed = solicitSeedInput();
+                        MapGenerator mg = new MapGenerator(WIDTH, HEIGHT - HUD_OFFSET, seed);
+                        TETile[][] map = mg.generate();
+                        World world = new World(map, seed);
+                        System.out.println(TETile.toString(map));
+                        startGame(world);
+                        drawGameOver();
+                        break;
+                    case 'l':
+                        try {
+                            World w = loadWorld();
+                            System.out.println(TETile.toString(w.map));
+                            startGame(w);
+                            drawGameOver();
+                        } catch (NullPointerException e) {
+                            System.out.println("No Archives, " + e);
+                        }
+                        break;
+                    case 'q':
+                        System.exit(0);
+                        break;
+                    default:
                 }
             }
         }
     }
 
-    private void displayInformation(World world) {
-        String info;
-        int xPosition = (int) StdDraw.mouseX();
-        int yPosition = (int) StdDraw.mouseY();
-        if (yPosition < HEIGHT - HUD_OFFSET) {
-            info = world.map[xPosition][yPosition].description();
-        } else {
-            info = "nothing";
-        }
-        StdDraw.clear(Color.black);
-        StdDraw.setPenColor(Color.white);
-        StdDraw.textLeft(1, HEIGHT - 1, info);
-        ter.renderFrameWithoutShow(world.map);
-        StdDraw.show();
-    }
 
     private void startGame(World world) {
         ter.initialize(WIDTH, HEIGHT, 0, 0);
@@ -130,17 +86,8 @@ public class Game {
         }
     }
 
-    private void drawGameOver() {
-        int midWidth = WIDTH / 2;
-        int midHeight = HEIGHT / 2;
-        StdDraw.clear(Color.black);
-        StdDraw.setPenColor(Color.white);
-        Font largeFont = new Font("Monaco", Font.BOLD, 20);
-        StdDraw.setFont(largeFont);
-        StdDraw.text(midWidth, midHeight, "Good job, you left the place.");
-        StdDraw.show();
-        StdDraw.pause(1500);
-        drawMenu();
+    private boolean isControlCommand(Character c) {
+        return c == 'w' || c == 'a' || c == 's' || c == 'd';
     }
 
     private static World loadWorld() {
@@ -167,6 +114,7 @@ public class Game {
         return null;
     }
 
+
     private static void saveWorld(World w) {
         File f = new File("./world.txt");
         try {
@@ -186,40 +134,88 @@ public class Game {
         }
     }
 
-    public void playWithKeyboard() {
-        init();
-        drawMenu();
+    private void displayInformation(World world) {
+        String info;
+        int xPosition = (int) StdDraw.mouseX();
+        int yPosition = (int) StdDraw.mouseY();
+        if (yPosition < HEIGHT - HUD_OFFSET) {
+            info = world.map[xPosition][yPosition].description();
+        } else {
+            info = "nothing";
+        }
+        StdDraw.clear(Color.black);
+        StdDraw.setPenColor(Color.white);
+        StdDraw.textLeft(1, HEIGHT - 1, info);
+        ter.renderFrameWithoutShow(world.map);
+        StdDraw.show();
+    }
+
+    private long solicitSeedInput() {
+        String input = "";
         while (true) {
+            drawSeed(input);
             if (StdDraw.hasNextKeyTyped()) {
                 char c = StdDraw.nextKeyTyped();
-                c = Character.toLowerCase(c);
-                switch (c) {
-                    case 'n':
-                        int seed = beginNewGame();
-                        Map mp = new Map(seed, WIDTH, HEIGHT - HUD_OFFSET);
-                        TETile[][] map = mp.generateWorld();
-                        World world = new World(map, seed);
-                        System.out.println(TETile.toString(world.map));
-                        startGame(world);
-                        drawGameOver();
-                        break;
-                    case 'l':
-                        try {
-                            World w = loadWorld();
-                            System.out.println(TETile.toString(w.map));
-                            startGame(w);
-                            drawGameOver();
-                        } catch (NullPointerException e) {
-                            System.out.println("No archives," + e);
-                        }
-                        break;
-                    case 'q':
-                        System.exit(0);
-                        break;
-                    default:
+                if (Character.isDigit(c)) {
+                    input += String.valueOf(c);
+                } else if (Character.toLowerCase(c) == 's' && !input.equals("")) {
+                    long seed = Long.parseLong(input);
+                    return seed;
                 }
             }
         }
+    }
+
+    private void init() {
+        StdDraw.setCanvasSize(WIDTH * 16, HEIGHT * 16);
+        StdDraw.setXscale(0, WIDTH);
+        StdDraw.setYscale(0, HEIGHT);
+        StdDraw.clear(Color.BLACK);
+        StdDraw.enableDoubleBuffering();
+    }
+
+    private void drawMenu() {
+        int midWidth = WIDTH / 2;
+        int midHeight = HEIGHT / 2;
+        StdDraw.clear();
+        StdDraw.clear(Color.black);
+        Font bigFont = new Font("Monaco", Font.BOLD, 30);
+        Font smallFont = new Font("Monaco", Font.BOLD, 20);
+        StdDraw.setFont(bigFont);
+        StdDraw.setPenColor(Color.white);
+        StdDraw.text(midWidth, midHeight + 4, "CS61B Proj2: GAME");
+        StdDraw.setFont(smallFont);
+        StdDraw.text(midWidth, midHeight, "New Game (N)");
+        StdDraw.text(midWidth, midHeight - 2, "Load Game (L)");
+        StdDraw.text(midWidth, midHeight - 4, "Quit (Q)");
+        StdDraw.show();
+    }
+
+    private void drawSeed(String input) {
+        int midWidth = WIDTH / 2;
+        int midHeight = HEIGHT / 2;
+        StdDraw.clear(Color.black);
+        StdDraw.setPenColor(Color.white);
+        Font largeFont = new Font("Monaco", Font.BOLD, 20);
+        StdDraw.setFont(largeFont);
+        StdDraw.text(midWidth, midHeight + 2, "Place input a seed (End with 'S')");
+        Font smallFont = new Font("Monaco", Font.BOLD, 19);
+        StdDraw.setFont(smallFont);
+        StdDraw.text(midWidth, midHeight - 1, input);
+        StdDraw.show();
+    }
+
+    private void drawGameOver() {
+        int midWidth = WIDTH / 2;
+        int midHeight = HEIGHT / 2;
+        StdDraw.clear(Color.black);
+        StdDraw.setPenColor(Color.white);
+        Font largeFont = new Font("Monaco", Font.BOLD, 20);
+        StdDraw.setFont(largeFont);
+        StdDraw.text(midWidth, midHeight, "Good job, you left the place.");
+        StdDraw.show();
+        StdDraw.pause(1500);
+        drawMenu();
     }
 
     private World parseInputString(World world, String command) {
@@ -237,13 +233,14 @@ public class Game {
 
     /**
      * Method used for autograding and testing the game code. The input string will be a series
-     * of characters for example, "n123sswwdasdassadwas", "n123sss:q", "lwww". The game should
+     * of characters (for example, "n123sswwdasdassadwas", "n123sss:q", "lwww". The game should
      * behave exactly as if the user typed these characters into the game after playing
      * playWithKeyboard. If the string ends in ":q", the same world should be returned as if the
      * string did not end with q. For example "n123sss" and "n123sss:q" should return the same
      * world. However, the behavior is slightly different. After playing with "n123sss:q", the game
      * should save, and thus if we then called playWithInputString with the string "l", we'd expect
      * to get the exact same world back again, since this corresponds to loading the saved game.
+     *
      * @param input the input string to feed to your program
      * @return the 2D TETile[][] representing the state of the world
      */
@@ -252,8 +249,9 @@ public class Game {
         if (input.startsWith("n")) {
             int sIndex = input.indexOf("s");
             long seed = Long.parseLong(input.substring(1, sIndex));
-            Map gameMap = new Map(seed, WIDTH, HEIGHT - HUD_OFFSET);
-            World initWorld = new World(gameMap.generateWorld(), seed);
+            MapGenerator mg = new MapGenerator(WIDTH, HEIGHT - HUD_OFFSET, seed);
+            TETile[][] map = mg.generate();
+            World initWorld = new World(map, seed);
             World world = parseInputString(initWorld, input.substring(sIndex + 1));
             return world.map;
         } else if (input.startsWith("l")) {
@@ -265,4 +263,5 @@ public class Game {
         }
         return null;
     }
+
 }
