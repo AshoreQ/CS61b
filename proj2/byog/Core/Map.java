@@ -19,10 +19,10 @@ public class Map {
     private List<Room> existingRooms = new ArrayList(rNumber);
     private TETile[][] world;
 
-    Map(long seed, int width, int height) {
-        this.seed = seed;
-        this.width = width;
-        this.height = height;
+    Map(long s, int w, int h) {
+        this.seed = s;
+        this.width = w;
+        this.height = h;
         random = new Random(this.seed);
         world = new TETile[width][height];
     }
