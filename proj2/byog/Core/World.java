@@ -17,7 +17,7 @@ public class World implements Serializable{
     private int height;
     boolean gameOver = false;
 
-    private class Player implements Serializable {
+    public class Player implements Serializable {
         private static final long serialVersionUID = 10923233434L;
         int x;
         int y;

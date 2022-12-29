@@ -13,10 +13,10 @@ public class Map {
     private int height;
     private long seed;
     private Random random;
-    private int Rwidth = 10;
-    private int Rheight = 8;
-    private int Rnumber = 15;
-    private List<Room> existingRooms = new ArrayList(Rnumber);
+    private int rWidth = 10;
+    private int rHeight = 8;
+    private int rNumber = 15;
+    private List<Room> existingRooms = new ArrayList(rNumber);
     private TETile[][] world;
 
     Map(long seed, int width, int height) {
@@ -61,8 +61,8 @@ public class Map {
     private Room getNewRandomRoom() {
         int xPos = uniform(random, 0, width);
         int yPos = uniform(random, 0, height);
-        int roomWidth = uniform(random, 3, Rwidth);
-        int roomHeight = uniform(random, 3, Rheight);
+        int roomWidth = uniform(random, 3, rWidth);
+        int roomHeight = uniform(random, 3, rHeight);
         Position pos = new Position(xPos, yPos);
         Room room = new Room(pos, roomWidth, roomHeight);
         return room;
@@ -111,48 +111,48 @@ public class Map {
                 && (room.position.y + room.height < height);
     }
 
-    private void addRoomFloor(TETile[][] world, Position pos, int width, int height) {
-        for (int i = 0; i < height; i += 1) {
-            for (int j = 0; j < width; j += 1) {
-                world[pos.x + j][pos.y + i] =
+    private void addRoomFloor(TETile[][] myWorld, Position pos, int myWidth, int myHeight) {
+        for (int i = 0; i < myHeight; i += 1) {
+            for (int j = 0; j < myWidth; j += 1) {
+                myWorld[pos.x + j][pos.y + i] =
                         TETile.colorVariant(Tileset.FLOOR, 64, 64, 64, random);
             }
         }
     }
 
-    private void addLeftWall(TETile[][] world, Position pos, int height) {
-        for (int i = 0; i < height; i += 1) {
-            world[pos.x - 1][pos.y + i] =
+    private void addLeftWall(TETile[][] myWorld, Position pos, int myHeight) {
+        for (int i = 0; i < myHeight; i += 1) {
+            myWorld[pos.x - 1][pos.y + i] =
                     TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
         }
     }
 
-    private void addRightWall(TETile[][] world, Position pos, int height, int width) {
-        for (int i = 0; i < height; i += 1) {
-            world[pos.x + width][pos.y + i] =
+    private void addRightWall(TETile[][] myWorld, Position pos, int myHeight, int myWidth) {
+        for (int i = 0; i < myHeight; i += 1) {
+            myWorld[pos.x + myWidth][pos.y + i] =
                     TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
         }
     }
 
-    private void addAboveWall(TETile[][] world, Position pos, int height, int width) {
-        for (int i = 0; i < width + 2; i += 1) {
-            world[pos.x - 1 + i][pos.y + height] =
+    private void addAboveWall(TETile[][] myWorld, Position pos, int myHeight, int myWidth) {
+        for (int i = 0; i < myWidth + 2; i += 1) {
+            myWorld[pos.x - 1 + i][pos.y + myHeight] =
                     TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
         }
     }
 
-    private void addBelowWall(TETile[][] world, Position pos, int width) {
-        for (int i = 0; i < width + 2; i += 1) {
-            world[pos.x - 1 + i][pos.y - 1]
+    private void addBelowWall(TETile[][] myWorld, Position pos, int myWidth) {
+        for (int i = 0; i < myWidth + 2; i += 1) {
+            myWorld[pos.x - 1 + i][pos.y - 1]
                     = TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
         }
     }
 
-    private void addRoomWall(TETile[][] world, Position pos, int width, int height) {
-        addBelowWall(world, pos, width);
-        addAboveWall(world, pos, height, width);
-        addLeftWall(world, pos, height);
-        addRightWall(world, pos, height, width);
+    private void addRoomWall(TETile[][] myWorld, Position pos, int myWidth, int myHeight) {
+        addBelowWall(myWorld, pos, myWidth);
+        addAboveWall(myWorld, pos, myHeight, myWidth);
+        addLeftWall(myWorld, pos, myHeight);
+        addRightWall(myWorld, pos, myHeight, myWidth);
     }
 
     private Position getRandomPosition(Room room) {
@@ -161,92 +161,92 @@ public class Map {
         return new Position(room.position.x + xOffset, room.position.y + yOffset);
     }
 
-    private boolean isFloor(TETile[][] world, int x, int y) {
-        return !(world[x][y].character() == '#' || world[x][y].character() == ' ');
+    private boolean isFloor(TETile[][] myWorld, int x, int y) {
+        return !(myWorld[x][y].character() == '#' || myWorld[x][y].character() == ' ');
     }
 
-    private void addHorizontalHallway(TETile[][] world, Position a, Position b) {
+    private void addHorizontalHallway(TETile[][] myWorld, Position a, Position b) {
         int distance = Math.abs(b.x - a.x) + 1;
         if (a.x <= b.x) {
             for (int i = 0; i < distance; i += 1) {
-                if (!isFloor(world, a.x + i, a.y)) {
-                    world[a.x + i][a.y] =
+                if (!isFloor(myWorld, a.x + i, a.y)) {
+                    myWorld[a.x + i][a.y] =
                             TETile.colorVariant(Tileset.FLOOR, 64, 64, 64, random);
                 }
-                if (!isFloor(world, a.x + i, a.y - 1)) {
-                    world[a.x + i][a.y - 1] =
+                if (!isFloor(myWorld, a.x + i, a.y - 1)) {
+                    myWorld[a.x + i][a.y - 1] =
                             TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
                 }
-                if (!isFloor(world, a.x + i, a.y + 1)) {
-                    world[a.x + i][a.y + 1] =
+                if (!isFloor(myWorld, a.x + i, a.y + 1)) {
+                    myWorld[a.x + i][a.y + 1] =
                             TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
                 }
             }
         } else {
             for (int i = 0; i < distance; i += 1) {
-                if (!isFloor(world, b.x + i, a.y)) {
-                    world[b.x + i][a.y] =
+                if (!isFloor(myWorld, b.x + i, a.y)) {
+                    myWorld[b.x + i][a.y] =
                             TETile.colorVariant(Tileset.FLOOR, 64, 64, 64, random);
                 }
-                if (!isFloor(world, b.x + i, a.y - 1)) {
-                    world[b.x + i][a.y - 1] =
+                if (!isFloor(myWorld, b.x + i, a.y - 1)) {
+                    myWorld[b.x + i][a.y - 1] =
                             TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
                 }
-                if (!isFloor(world, b.x + i, b.y + 1)) {
-                    world[b.x + i][a.y + 1] =
+                if (!isFloor(myWorld, b.x + i, b.y + 1)) {
+                    myWorld[b.x + i][a.y + 1] =
                             TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
                 }
             }
         }
     }
 
-    private void addVerticalHallway(TETile[][] world, Position a, Position b) {
+    private void addVerticalHallway(TETile[][] myWorld, Position a, Position b) {
         int distance = Math.abs(a.y - b.y) + 1;
         if (a.y <= b.y) {
             for (int i = 0; i < distance; i += 1) {
-                if (!isFloor(world, b.x, a.y + i)) {
-                    world[b.x][a.y + i] =
+                if (!isFloor(myWorld, b.x, a.y + i)) {
+                    myWorld[b.x][a.y + i] =
                             TETile.colorVariant(Tileset.FLOOR, 64, 64, 64, random);
                 }
-                if (!isFloor(world, b.x - 1, a.y + i)) {
-                    world[b.x - 1][a.y + i] =
+                if (!isFloor(myWorld, b.x - 1, a.y + i)) {
+                    myWorld[b.x - 1][a.y + i] =
                             TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
                 }
-                if (!isFloor(world, b.x + 1, a.y + i)) {
-                    world[b.x + 1][a.y + i] =
+                if (!isFloor(myWorld, b.x + 1, a.y + i)) {
+                    myWorld[b.x + 1][a.y + i] =
                             TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
                 }
             }
         } else {
             for (int i = 0; i < distance; i += 1) {
-                if (!isFloor(world, b.x, b.y + i)) {
-                    world[b.x][b.y + i] =
+                if (!isFloor(myWorld, b.x, b.y + i)) {
+                    myWorld[b.x][b.y + i] =
                             TETile.colorVariant(Tileset.FLOOR, 64, 64, 64, random);
                 }
-                if (!isFloor(world, b.x - 1, b.y + i)) {
-                    world[b.x - 1][b.y + i] =
+                if (!isFloor(myWorld, b.x - 1, b.y + i)) {
+                    myWorld[b.x - 1][b.y + i] =
                             TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
                 }
-                if (!isFloor(world, b.x + 1, b.y + i)) {
-                    world[b.x + 1][b.y + i] =
+                if (!isFloor(myWorld, b.x + 1, b.y + i)) {
+                    myWorld[b.x + 1][b.y + i] =
                             TETile.colorVariant(Tileset.WALL, 64, 64, 64, random);
                 }
             }
         }
     }
 
-    private void addHallway(TETile[][] world, Position a, Position b) {
-        addHorizontalHallway(world, a, b);
-        addVerticalHallway(world, a, b);
+    private void addHallway(TETile[][] myWorld, Position a, Position b) {
+        addHorizontalHallway(myWorld, a, b);
+        addVerticalHallway(myWorld, a, b);
     }
 
-    private  void addDoor(TETile[][] world) {
+    private  void addDoor(TETile[][] myWorld) {
         TETile t = TETile.colorVariant(Tileset.LOCKED_DOOR, 64, 64, 64, random);
         int xi = uniform(random, 0, width);
         int yi = uniform(random, 0, height);
         while (xi < width && yi < height) {
-            if (world[xi][yi].character() == Tileset.WALL.character()) {
-                world[xi][yi] = t;
+            if (myWorld[xi][yi].character() == Tileset.WALL.character()) {
+                myWorld[xi][yi] = t;
                 break;
             }
             yi++;
@@ -267,7 +267,7 @@ public class Map {
             }
         }
 
-        int totalRoom = uniform(random, 10, Rnumber);
+        int totalRoom = uniform(random, 10, rNumber);
         while (totalRoom > 0) {
             Room room =  getNewRandomRoom();
             existingRooms.add(room);

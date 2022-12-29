@@ -81,7 +81,7 @@ public class Game {
                     StdDraw.clear(Color.BLACK);
                     StdDraw.setFont(bigFont);
                     StdDraw.text(midWidth, midHeight, "Random seed:");
-                    StdDraw.text(midWidth, midHeight - 2, input);
+                    StdDraw.text(midWidth, midHeight - 3, input);
                     StdDraw.setFont(smallFont);
                     StdDraw.text(midWidth, midHeight - 6, "( Please enter S after the number )");
                     StdDraw.show();
