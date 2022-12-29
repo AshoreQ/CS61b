@@ -55,9 +55,9 @@ public class Game {
         StdDraw.show();
     }
 
-    private int beginNewGame() {
+    private long beginNewGame() {
         int midWidth = WIDTH / 2, midHeight = HEIGHT / 2;
-        int seed;
+        long seed;
         String input = "";
 
         StdDraw.clear(Color.BLACK);
@@ -67,22 +67,23 @@ public class Game {
 
         Font smallFont = new Font("Monaco", Font.BOLD, 20);
         StdDraw.setFont(smallFont);
-        StdDraw.text(midWidth, midHeight - 3, "( Please enter S after the number )");
+        StdDraw.text(midWidth, midHeight - 6, "( Please enter S after the number )");
         StdDraw.show();
 
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
                 char c = StdDraw.nextKeyTyped();
                 if (c == 'S') {
-                    seed = Integer.parseInt(input);
+                    seed = Long.parseLong(input);
                     return seed;
                 } else {
                     input += c;
                     StdDraw.clear(Color.BLACK);
                     StdDraw.setFont(bigFont);
-                    StdDraw.text(midWidth, midHeight, "Random seed:" + input);
+                    StdDraw.text(midWidth, midHeight, "Random seed:");
+                    StdDraw.text(midWidth, midHeight - 2, input);
                     StdDraw.setFont(smallFont);
-                    StdDraw.text(midWidth, midHeight - 3, "( Please enter S after the number )");
+                    StdDraw.text(midWidth, midHeight - 6, "( Please enter S after the number )");
                     StdDraw.show();
                 }
             }
@@ -195,7 +196,7 @@ public class Game {
                 c = Character.toLowerCase(c);
                 switch (c) {
                     case 'n':
-                        int seed = beginNewGame();
+                        long seed = beginNewGame();
                         Map mp = new Map(seed, WIDTH, HEIGHT - HUD_OFFSET);
                         TETile[][] map = mp.generateWorld();
                         World world = new World(map, seed);
@@ -252,8 +253,9 @@ public class Game {
         if (input.startsWith("n")) {
             int sIndex = input.indexOf("s");
             long seed = Long.parseLong(input.substring(1, sIndex));
-            Map gameMap = new Map(seed, WIDTH, HEIGHT - HUD_OFFSET);
-            World initWorld = new World(gameMap.generateWorld(), seed);
+            Map mp = new Map(seed, WIDTH, HEIGHT - HUD_OFFSET);
+            TETile[][] map = mp.generateWorld();
+            World initWorld = new World(map, seed);
             World world = parseInputString(initWorld, input.substring(sIndex + 1));
             return world.map;
         } else if (input.startsWith("l")) {

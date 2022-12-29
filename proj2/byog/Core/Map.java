@@ -15,7 +15,7 @@ public class Map {
     private Random random;
     private int Rwidth = 10;
     private int Rheight = 8;
-    private int Rnumber = 25;
+    private int Rnumber = 15;
     private List<Room> existingRooms = new ArrayList(Rnumber);
     private TETile[][] world;
 
@@ -23,7 +23,7 @@ public class Map {
         this.seed = seed;
         this.width = width;
         this.height = height;
-        random = new Random(seed);
+        random = new Random(this.seed);
         world = new TETile[width][height];
     }
 
@@ -267,7 +267,7 @@ public class Map {
             }
         }
 
-        int totalRoom = uniform(random, 15, Rnumber);
+        int totalRoom = uniform(random, 10, Rnumber);
         while (totalRoom > 0) {
             Room room =  getNewRandomRoom();
             existingRooms.add(room);
