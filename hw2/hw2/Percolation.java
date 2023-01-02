@@ -4,7 +4,7 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
     private int n;
-    private int size;
+    private int size = 0;
     private boolean[][] sites;
     private WeightedQuickUnionUF set;
 
@@ -37,9 +37,6 @@ public class Percolation {
             throw new IndexOutOfBoundsException("Please enter valid arguments !");
         }
 
-        size += 1;
-        sites[row][col] = true;
-
         if (row >= 1 && row <= n - 2) {
             if (sites[row - 1][col]) {
                 set.union(xyToX(row, col), xyToX(row - 1, col));
@@ -71,6 +68,9 @@ public class Percolation {
                 set.union(xyToX(row, col), xyToX(row, col - 1));
             }
         }
+
+        sites[row][col] = true;
+        size += 1;
     }
 
     public boolean isOpen(int row, int col) {
@@ -81,11 +81,14 @@ public class Percolation {
     }
 
     public boolean isFull(int row, int col) {
+        if (row < 0 || col < 0 || row >= n || col >= n) {
+            throw new IndexOutOfBoundsException("Please enter valid arguments !");
+        }
         int pos = xyToX(row, col);
         if (set.find(pos) == n * n + 1 && !set.connected(pos, 0)) {
             return false;
         }
-        return set.connected(set.find(pos), 0);
+        return sites[row][col] && set.connected(set.find(pos), 0);
     }
 
     public int numberOfOpenSites() {
@@ -102,6 +105,7 @@ public class Percolation {
         PercolationStats test = new PercolationStats(200, 100, pf);
         double low = test.confidenceLow(), hight = test.confidenceHigh();
         System.out.println("[" + low + ", " + hight + "]");
-        System.out.println(test.stddev()); */
+        System.out.println(test.stddev());
+         */
     }
 }
