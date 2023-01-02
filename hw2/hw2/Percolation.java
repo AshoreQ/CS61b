@@ -3,109 +3,117 @@ package hw2;
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
-    private int n;
-    private int size = 0;
-    private boolean[][] sites;
-    private WeightedQuickUnionUF set;
+    private class Site {
+        boolean open;
+        boolean isConnectedBottom;
 
-    private int xyTo1D(int x, int y) {
-        return x * n + y;
+        Site() {
+            this.open = false;
+            this.isConnectedBottom = false;
+        }
     }
+
+    private Site[][] sites;
+    private int numberOfOpenSites;
+    private WeightedQuickUnionUF uf;
+    private Site topVirtualSite;
+    private int topIndex;
+    private boolean percolated;
 
     public Percolation(int N) {
         if (N <= 0) {
             throw new IllegalArgumentException("N < 0");
         }
+        sites = new Site[N][N];
+        for (Site[] row : sites) {
+            for (int i = 0; i < N; ++i) {
+                row[i] = new Site();
+            }
+        }
+        numberOfOpenSites = 0;
+        uf = new WeightedQuickUnionUF(N * N + 1);
+        topIndex = uf.count() - 1;
+        topVirtualSite = new Site();
+        percolated = false;
+        for (int i = 0; i < sites[0].length; ++i) {
+            uf.union(i, topIndex);
+            sites[sites.length - 1][i].isConnectedBottom = true;
+        }
+    }
 
-        n = N;
-        set = new WeightedQuickUnionUF(n * n + 2);
-        sites = new boolean[n][n];
+    private int xyTo1D(int r, int c) {
+        return r * sites.length + c;
+    }
 
-        for (int i = 0; i < n; ++i) {
-            set.union(n * n, i);
-            for (int j = 0; j < n; ++j) {
-                sites[i][j] = false;
-                if (i == n - 1) {
-                    set.union(n * n + 1, xyTo1D(i, j));
+    private Site indexToSite(int index) {
+        if (index != topIndex) {
+            int r = index / sites.length;
+            int c = index - r * sites.length;
+            return sites[r][c];
+        } else {
+            return topVirtualSite;
+        }
+    }
+
+    private boolean invalid(int row, int col) {
+        return row < 0 || row >= sites.length || col < 0 || col >= sites.length;
+    }
+
+    private void addUnion(int row, int col, int dr, int dc) {
+        if (!invalid(row + dr, col + dc) && isOpen(row + dr, col + dc)) {
+            int p1 = uf.find(xyTo1D(row, col));
+            int p2 = uf.find(xyTo1D(row + dr, col + dc));
+            uf.union(xyTo1D(row, col), xyTo1D(row + dr, col + dc));
+            int newParent = uf.find(xyTo1D(row, col));
+            indexToSite(newParent).isConnectedBottom =
+                    indexToSite(p1).isConnectedBottom || indexToSite(p2).isConnectedBottom;
+        }
+    }
+
+    public void open(int row, int col) {
+        if (invalid(row, col)) {
+            throw new IndexOutOfBoundsException("Open " + row + "," + col);
+        }
+        if (!sites[row][col].open) {
+            sites[row][col].open = true;
+            addUnion(row, col, 0, 1);
+            addUnion(row, col, 0, -1);
+            addUnion(row, col, 1, 0);
+            addUnion(row, col, -1, 0);
+            numberOfOpenSites += 1;
+
+            if (!percolated) {
+                int parent = uf.find(xyTo1D(row, col));
+                if (indexToSite(parent).isConnectedBottom && uf.connected(parent, topIndex)) {
+                    percolated = true;
                 }
             }
         }
     }
 
-    public void open(int row, int col) {
-        if (row < 0 || col < 0 || row >= n || col >= n) {
-            throw new IndexOutOfBoundsException("row:" + row + " col:" + col);
-        }
-
-        if (row >= 1 && row <= n - 2) {
-            if (sites[row - 1][col]) {
-                set.union(xyTo1D(row, col), xyTo1D(row - 1, col));
-            }
-            if (sites[row + 1][col]) {
-                set.union(xyTo1D(row, col), xyTo1D(row + 1, col));
-            }
-        } else {
-            if (row == 0 && (row + 1 <= n - 1) && sites[row + 1][col]) {
-                set.union(xyTo1D(row, col), xyTo1D(row + 1, col));
-            }
-            if (row == n - 1 && (row - 1 >= 0) && sites[row - 1][col]) {
-                set.union(xyTo1D(row, col), xyTo1D(row - 1, col));
-            }
-        }
-
-        if (col >= 1 && col <= n - 2) {
-            if (sites[row][col - 1]) {
-                set.union(xyTo1D(row, col), xyTo1D(row, col - 1));
-            }
-            if (sites[row][col + 1]) {
-                set.union(xyTo1D(row, col), xyTo1D(row, col + 1));
-            }
-        } else {
-            if (col == 0 && (col + 1 <= n - 1) && sites[row][col + 1]) {
-                set.union(xyTo1D(row, col), xyTo1D(row, col + 1));
-            }
-            if (col == n - 1 && (col - 1 >= 0) && sites[row][col - 1]) {
-                set.union(xyTo1D(row, col), xyTo1D(row, col - 1));
-            }
-        }
-        if (!isOpen(row, col)) {
-            sites[row][col] = true;
-            size += 1;
-        }
-    }
-
     public boolean isOpen(int row, int col) {
-        if (row < 0 || col < 0 || row >= n || col >= n) {
-            throw new IndexOutOfBoundsException("row:" + row + " col:" + col);
+        if (invalid(row, col)) {
+            throw new IndexOutOfBoundsException("isOpen " + row + "," + col);
         }
-        return sites[row][col];
+        return sites[row][col].open;
     }
 
     public boolean isFull(int row, int col) {
-        if (row < 0 || col < 0 || row >= n || col >= n) {
-            throw new IndexOutOfBoundsException("row:" + row + " col:" + col);
+        if (invalid(row, col)) {
+            throw new IndexOutOfBoundsException("isOpen " + row + "," + col);
         }
-        int pos = xyTo1D(row, col);
-        return sites[row][col] && set.connected(pos, n * n);
+        return isOpen(row, col) && uf.connected(xyTo1D(row, col), topIndex);
     }
 
     public int numberOfOpenSites() {
-        return size;
+        return numberOfOpenSites;
     }
 
     public boolean percolates() {
-        if (n == 1) {
-            return false;
-        }
-        return set.connected(n * n, n * n + 1);
+        return percolated;
     }
 
     public static void main(String[] args) {
-        /*
-        PercolationFactory pf = new PercolationFactory();
-        PercolationStats test = new PercolationStats(200, 100, pf);
-        double low = test.confidenceLow(), hight = test.confidenceHigh();
-        System.out.println("[" + low + ", " + hight + "]");
-        System.out.println(test.stddev()); */
     }
+
 }
