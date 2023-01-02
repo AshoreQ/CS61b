@@ -86,9 +86,6 @@ public class Percolation {
             throw new IndexOutOfBoundsException("row:" + row + " col:" + col);
         }
         int pos = xyTo1D(row, col);
-        if (set.find(pos) == n * n + 1 && !set.connected(pos, n * n)) {
-            return false;
-        }
         return sites[row][col] && set.connected(pos, n * n);
     }
 
@@ -97,6 +94,9 @@ public class Percolation {
     }
 
     public boolean percolates() {
+        if (n == 1) {
+            return false;
+        }
         return set.connected(n * n, n * n + 1);
     }
 
