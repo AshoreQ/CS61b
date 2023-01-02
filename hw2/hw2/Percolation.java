@@ -45,10 +45,10 @@ public class Percolation {
                 set.union(xyTo1D(row, col), xyTo1D(row + 1, col));
             }
         } else {
-            if (row == 0 && sites[row + 1][col]) {
+            if (row == 0 && (row + 1 <= n - 1) && sites[row + 1][col]) {
                 set.union(xyTo1D(row, col), xyTo1D(row + 1, col));
             }
-            if (row == n - 1 && sites[row - 1][col]) {
+            if (row == n - 1 && (row - 1 >= 0) && sites[row - 1][col]) {
                 set.union(xyTo1D(row, col), xyTo1D(row - 1, col));
             }
         }
@@ -61,10 +61,10 @@ public class Percolation {
                 set.union(xyTo1D(row, col), xyTo1D(row, col + 1));
             }
         } else {
-            if (col == 0 && sites[row][col + 1]) {
+            if (col == 0 && (col + 1 <= n - 1) && sites[row][col + 1]) {
                 set.union(xyTo1D(row, col), xyTo1D(row, col + 1));
             }
-            if (col == n - 1 && sites[row][col - 1]) {
+            if (col == n - 1 && (col - 1 >= 0) && sites[row][col - 1]) {
                 set.union(xyTo1D(row, col), xyTo1D(row, col - 1));
             }
         }
