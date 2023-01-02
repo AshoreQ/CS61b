@@ -5,7 +5,7 @@ import edu.princeton.cs.introcs.StdStats;
 
 public class PercolationStats {
     private double[] thresholds;
-    int T;
+    private int T;
 
 
     public PercolationStats(int N, int T, PercolationFactory pf) {

@@ -97,10 +97,11 @@ public class Percolation {
     }
 
     public static void main(String[] args) {
+        /*
         PercolationFactory pf = new PercolationFactory();
         PercolationStats test = new PercolationStats(200, 100, pf);
         double low = test.confidenceLow(), hight = test.confidenceHigh();
         System.out.println("[" + low + ", " + hight + "]");
-
+        System.out.println(test.stddev()); */
     }
 }
