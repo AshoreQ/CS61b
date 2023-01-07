@@ -26,7 +26,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         this.clear();
     }
 
-    /* Removes all of the mappings from this map. */
+    /* Removes all the mappings from this map. */
     @Override
     public void clear() {
         this.size = 0;
@@ -53,19 +53,58 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      */
     @Override
     public V get(K key) {
-        throw new UnsupportedOperationException();
+        if (key == null) {
+            throw new IllegalArgumentException("call get() with a null key");
+        }
+        int index = hash(key);
+        return buckets[index].get(key);
     }
 
+    private void grow() {
+        ArrayMap<K, V>[] newBuckets = new ArrayMap[buckets.length * 2];
+        for (int i = 0; i < newBuckets.length; ++i) {
+            newBuckets[i] = new ArrayMap<>();
+        }
+
+        for (int i = 0; i < buckets.length; ++i) {
+            for (int j = 0; j < buckets[i].size; ++j) {
+                K key = buckets[i].getKey(j);
+                V value = buckets[i].get(key);
+                int index = Math.floorMod(key.hashCode(), newBuckets.length);
+                newBuckets[index].put(key, value);
+            }
+        }
+        buckets = newBuckets;
+    }
     /* Associates the specified value with the specified key in this map. */
     @Override
     public void put(K key, V value) {
-        throw new UnsupportedOperationException();
+        if (key == null) {
+            throw new IllegalArgumentException("call put() with a null key");
+        }
+
+        int index = hash(key);
+        V val = buckets[index].get(key);
+        if (val != null) {
+            if (val != value) {
+                buckets[index].remove(key);
+                buckets[index].put(key, value);
+            }
+            return;
+        }
+
+        buckets[index].put(key, value);
+        size += 1;
+
+        if (loadFactor() > MAX_LF) {
+            grow();
+        }
     }
 
     /* Returns the number of key-value mappings in this map. */
     @Override
     public int size() {
-        throw new UnsupportedOperationException();
+        return size;
     }
 
     //////////////// EVERYTHING BELOW THIS LINE IS OPTIONAL ////////////////
