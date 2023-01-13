@@ -27,10 +27,10 @@ public class Solver {
         }
     }
 
-    MinPQ<Node> minPQ = new MinPQ<>();
-    Map<WorldState, Integer> map = new HashMap<>();
-    Node finalNode;
-    boolean isGoal = false;
+    private MinPQ<Node> minPQ = new MinPQ<>();
+    private Map<WorldState, Integer> map = new HashMap<>();
+    private Node finalNode;
+    private boolean isGoal = false;
 
     public Solver(WorldState initial) {
         Node intialNode = new Node(initial, 0, 0, null);
