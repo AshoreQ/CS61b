@@ -59,17 +59,8 @@ public class MergeSort {
     private static <Item extends Comparable> Queue<Item> mergeSortedQueues(
             Queue<Item> q1, Queue<Item> q2) {
         Queue<Item> result = new Queue<>();
-        while (!q1.isEmpty() && !q2.isEmpty()) {
+        while (!q1.isEmpty() || !q2.isEmpty()) {
             result.enqueue(getMin(q1, q2));
-        }
-        if (q1.isEmpty()) {
-            while (!q2.isEmpty()) {
-                result.enqueue(q2.dequeue());
-            }
-        } else {
-            while (!q1.isEmpty()) {
-                result.enqueue(q1.dequeue());
-            }
         }
         return result;
     }
