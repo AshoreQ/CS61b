@@ -66,19 +66,37 @@ public class CountingSort {
      * @param arr int array that will be sorted
      */
     public static int[] betterCountingSort(int[] arr) {
-        int min = Integer.MAX_VALUE;
-        for (int i = 0; i < arr.length; ++i) {
-            if (min >= arr[i]) {
-                min = arr[i];
-            }
-        }
-        for (int i = 0; i < arr.length; ++i) {
-            arr[i] = arr[i] + Math.abs(min);
+        int max = Integer.MIN_VALUE;
+        for (int i : arr) {
+            max = max > i ? max : i;
         }
 
-        int[] sorted = naiveCountingSort(arr);
-        for (int i = 0; i < arr.length; ++i) {
-            sorted[i] = sorted[i] - Math.abs(min);
+        // find min
+        int min = Integer.MAX_VALUE;
+        for (int i : arr) {
+            min = min < i ? min : i;
+        }
+
+        // gather all the counts for each value
+        int[] counts = new int[max - min + 1];
+        for (int i : arr) {
+            counts[i - min]++;
+        }
+
+        // counting sort that uses start position calculation
+        int[] starts = new int[max - min + 1];
+        int pos = 0;
+        for (int i = 0; i < starts.length; i += 1) {
+            starts[i] = pos;
+            pos += counts[i];
+        }
+
+        int[] sorted = new int[arr.length];
+        for (int i = 0; i < arr.length; i += 1) {
+            int item = arr[i] - min;
+            int place = starts[item];
+            sorted[place] = item;
+            starts[item] += 1;
         }
 
         return sorted;
