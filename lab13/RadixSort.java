@@ -16,8 +16,16 @@ public class RadixSort {
      * @return String[] the sorted array
      */
     public static String[] sort(String[] asciis) {
-        // TODO: Implement LSD Sort
-        return null;
+        String[] sorted = new String[asciis.length];
+        int maxLength = 0;
+        for (int i = 0; i < asciis.length; ++i) {
+            if (asciis[i].length() > maxLength) {
+                maxLength = asciis[i].length();
+            }
+            sorted[i] = asciis[i];
+        }
+        sortHelperLSD(sorted, maxLength);
+        return sorted;
     }
 
     /**
@@ -28,7 +36,41 @@ public class RadixSort {
      */
     private static void sortHelperLSD(String[] asciis, int index) {
         // Optional LSD helper method for required LSD radix sort
-        return;
+        if (index < 0) {
+            return;
+        }
+        int[] counts = new int[257];
+        for (String ascii : asciis) {
+            if (index >= ascii.length()) {
+                counts[0]++;
+            } else {
+                int i = (int) ascii.charAt(index) + 1;
+                counts[i]++;
+            }
+        }
+
+        int[] starts = new int[257];
+        int pos = 0;
+        for (int i = 0; i < starts.length; ++i) {
+            starts[i] = pos;
+            pos += counts[i];
+        }
+
+        String[] sorted = new String[asciis.length];
+        for (int i = 0; i < asciis.length; ++i) {
+            int item;
+            if (index >= asciis[i].length()) {
+                item = 0;
+            } else {
+                item = (int) asciis[i].charAt(index) + 1;
+            }
+            int place = starts[item];
+            sorted[place] = asciis[i];
+            starts[item] += 1;
+        }
+        System.arraycopy(sorted, 0, asciis, 0, asciis.length);
+
+        sortHelperLSD(asciis, index - 1);
     }
 
     /**
@@ -44,5 +86,13 @@ public class RadixSort {
     private static void sortHelperMSD(String[] asciis, int start, int end, int index) {
         // Optional MSD helper method for optional MSD radix sort
         return;
+    }
+
+    public static void main(String[] args) {
+        String[] test = {"z", "zz", "a", "bsd", "gbs", "wq", "iint", "ad"};
+        test = sort(test);
+        for (int i = 0; i < test.length; ++i) {
+            System.out.println(test[i]);
+        }
     }
 }
